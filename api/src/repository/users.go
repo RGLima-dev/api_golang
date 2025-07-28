@@ -6,15 +6,31 @@ import (
 )
 
 // Defines user repo
-type users struct {
+type Users struct {
 	db *sql.DB
 }
 
 // Create a user repo
-func NewUserRepo(db *sql.DB) *users {
-	return &users{db}
+func NewUserRepo(db *sql.DB) *Users {
+	return &Users{db}
 }
 
-func (u users) Create(user models.User) (uint64, error) {
-	return 0, nil
+func (repository Users) Create(user models.User) (uint64, error) {
+	statement, erro := repository.db.Prepare(
+		"INSERT INTO User(Name,Nickname,Email,Password) VALUES(?,?,?,?)",
+	)
+	if erro != nil {
+		return 0, nil
+	}
+	defer statement.Close()
+	result, erro := statement.Exec(user.Name, user.Nickname, user.Email, user.Password)
+	if erro != nil {
+		return 0, nil
+	}
+	LastInsertedId, erro := result.LastInsertId()
+	if erro != nil {
+		return 0, nil
+	}
+
+	return uint64(LastInsertedId), nil
 }
