@@ -17,13 +17,13 @@ func NewUserRepo(db *sql.DB) *Users {
 
 func (repository Users) Create(user models.User) (uint64, error) {
 	statement, erro := repository.db.Prepare(
-		"INSERT INTO User(Name,Nickname,Email,Password) VALUES(?,?,?,?)",
+		"INSERT INTO Users(username,nickname,email,passwd) VALUES(?,?,?,?)",
 	)
 	if erro != nil {
 		return 0, nil
 	}
 	defer statement.Close()
-	result, erro := statement.Exec(user.Name, user.Nickname, user.Email, user.Password)
+	result, erro := statement.Exec(user.Username, user.Nickname, user.Email, user.Password)
 	if erro != nil {
 		return 0, nil
 	}

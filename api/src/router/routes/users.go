@@ -20,9 +20,9 @@ var userRoutes = []Route{
 		NeedAuth: false,
 	},
 	{
-		Uri:      "/user/{userId}",
-		Method:   http.MethodPut,
-		Function: controllers.UpdateUser,
+		Uri:      "/users",
+		Method:   http.MethodPost,
+		Function: controllers.CreateUser,
 		NeedAuth: false,
 	},
 	{
