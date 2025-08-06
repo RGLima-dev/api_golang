@@ -13,7 +13,7 @@ type User struct {
 	Nickname  string    `json:"Nickname,omitempty"`
 	Email     string    `json:"Email,omitempty"`
 	Password  string    `json:"Password,omitempty"`
-	CreatedAt time.Time `json:"CreatedAt,omitempty"`
+	CreatedAt time.Time `json:"-"`
 }
 
 func (user *User) PrepareData() error {

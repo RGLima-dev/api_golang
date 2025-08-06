@@ -34,3 +34,60 @@ func (repository Users) Create(user models.User) (uint64, error) {
 
 	return uint64(LastInsertedId), nil
 }
+
+func (repository Users) GetAllUsers() ([]models.User, error) {
+	rows, erro := repository.db.Query(
+		"SELECT id, nickname FROM users",
+	)
+	if erro != nil {
+		return nil, erro
+	}
+	defer rows.Close()
+	var users []models.User
+
+	for rows.Next() {
+		var user models.User
+		if erro := rows.Scan(&user.Id, &user.Nickname); erro != nil {
+			return nil, erro
+		}
+		users = append(users, user)
+	}
+
+	if erro := rows.Err(); erro != nil {
+		return nil, erro
+	}
+
+	return users, nil
+
+}
+
+func (repository Users) GetSpecifiedUser(userId int) (models.User, error) {
+	var user models.User
+
+	erro := repository.db.QueryRow(
+		"SELECT id, nickname FROM users WHERE id = ?", userId,
+	).Scan(&user.Id, &user.Nickname)
+
+	if erro != nil {
+		return models.User{}, erro
+	}
+	return user, nil
+}
+
+func (repository Users) UpdateUser(userId int, userToBeUpdated models.User) (models.User, error) {
+
+	statment, erro := repository.db.Prepare(
+		"UPDATE users SET nickname = ? WHERE id = ?")
+
+	if erro != nil {
+		return models.User{}, nil
+	}
+	defer statment.Close()
+
+	_, erro = statment.Exec(userToBeUpdated.Nickname, userId)
+	if erro != nil {
+		return models.User{}, nil
+	}
+	userToBeUpdated.Id = uint64(userId)
+	return userToBeUpdated, nil
+}

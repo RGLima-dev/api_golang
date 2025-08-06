@@ -16,7 +16,7 @@ var userRoutes = []Route{
 	{
 		Uri:      "/user/{userId}",
 		Method:   http.MethodGet,
-		Function: controllers.GetUser,
+		Function: controllers.GetSpecificUser,
 		NeedAuth: false,
 	},
 	{
@@ -28,7 +28,7 @@ var userRoutes = []Route{
 	{
 		Uri:      "/user/{userId}",
 		Method:   http.MethodPut,
-		Function: controllers.CreateUser,
+		Function: controllers.UpdateUser,
 		NeedAuth: false,
 	},
 	{

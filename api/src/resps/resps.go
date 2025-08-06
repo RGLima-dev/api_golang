@@ -22,3 +22,13 @@ func ERROR(w http.ResponseWriter, statusCode int, erro error) {
 		Error: erro.Error(),
 	})
 }
+
+func JSONpretty(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.WriteHeader(statusCode)
+	jsonData, erro := json.MarshalIndent(data, "", "    ")
+	if erro != nil {
+		log.Fatal(erro)
+	}
+
+	w.Write(jsonData)
+}
