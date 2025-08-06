@@ -3,6 +3,7 @@ package repository
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 )
 
 // Defines user repo
@@ -90,4 +91,32 @@ func (repository Users) UpdateUser(userId int, userToBeUpdated models.User) (mod
 	}
 	userToBeUpdated.Id = uint64(userId)
 	return userToBeUpdated, nil
+}
+
+func (repository Users) DeleteUser(userId int) error {
+
+	statement, erro := repository.db.Prepare(
+		"DELETE FROM users WHERE id = ?;",
+	)
+	if erro != nil {
+		return erro
+	}
+
+	defer statement.Close()
+
+	result, erro := statement.Exec(userId)
+	if erro != nil {
+		return erro
+	}
+
+	rowsAffected, erro := result.RowsAffected()
+	if erro != nil {
+		return erro
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("not user with the id:", uint64(userId))
+	}
+
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"api/src/resps"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -123,5 +124,37 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	resps.JSON(w, http.StatusCreated, user)
 }
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Deleting User"))
+	bodyRequest, erro := io.ReadAll(r.Body)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnprocessableEntity, erro)
+		return
+	}
+	id_var := mux.Vars(r)
+	idStr := id_var["userId"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
+		return
+	}
+	var user models.User
+
+	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
+		resps.ERROR(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepo(db)
+	erro = repo.DeleteUser(id)
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	resps.JSON(w, http.StatusAccepted, map[string]interface{}{
+		"message": fmt.Sprintf("User with id %d deleted with success! id:", uint64(id)),
+	})
 }
