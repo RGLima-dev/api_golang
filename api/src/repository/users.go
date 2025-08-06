@@ -16,6 +16,21 @@ func NewUserRepo(db *sql.DB) *Users {
 	return &Users{db}
 }
 
+func (repository Users) ValidityUserEmail(email string) (models.User, error) {
+
+	row, erro := repository.db.Query("SELECT id,passwd from users WHERE email = ?", email)
+	if erro != nil {
+		return models.User{}, erro
+	}
+	var user models.User
+
+	if row.Next() {
+		if erro = row.Scan(&user.Id, &user.Password); erro != nil {
+			return models.User{}, erro
+		}
+	}
+	return user, nil
+}
 func (repository Users) Create(user models.User) (uint64, error) {
 	statement, erro := repository.db.Prepare(
 		"INSERT INTO Users(username,nickname,email,passwd) VALUES(?,?,?,?)",

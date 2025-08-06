@@ -12,6 +12,7 @@ import (
 var (
 	StringConnection = ""
 	Port             = 0
+	SecretKey        []byte
 )
 
 // Load env variables
@@ -31,5 +32,7 @@ func Load() {
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWD"),
 		os.Getenv("DB_NAME"))
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 
 }

@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS users(
     username varchar(50) not null,
     nickname varchar(50) not null unique,
     email varchar(50) not null unique,
-    passwd varchar(32) not null unique,
+    passwd varchar(72) not null unique,
     createdAt timestamp default current_timestamp()
 )ENGINE=INNODB;

@@ -155,6 +155,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		resps.ERROR(w, http.StatusInternalServerError, erro)
 	}
 	resps.JSON(w, http.StatusAccepted, map[string]interface{}{
-		"message": fmt.Sprintf("User with id %d deleted with success! id:", uint64(id)),
+		"message": fmt.Sprintf("User with id %d deleted with success!", uint64(id)),
 	})
 }
