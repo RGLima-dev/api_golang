@@ -90,7 +90,7 @@ func (repository Users) GetSpecifiedUser(userId int) (models.User, error) {
 	return user, nil
 }
 
-func (repository Users) UpdateUser(userId int, userToBeUpdated models.User) (models.User, error) {
+func (repository Users) UpdateUser(userId uint64, userToBeUpdated models.User) (models.User, error) {
 
 	statment, erro := repository.db.Prepare(
 		"UPDATE users SET nickname = ? WHERE id = ?")
@@ -108,7 +108,7 @@ func (repository Users) UpdateUser(userId int, userToBeUpdated models.User) (mod
 	return userToBeUpdated, nil
 }
 
-func (repository Users) DeleteUser(userId int) error {
+func (repository Users) DeleteUser(userId uint64) error {
 
 	statement, erro := repository.db.Prepare(
 		"DELETE FROM users WHERE id = ?;",

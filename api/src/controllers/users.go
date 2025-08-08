@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api/src/auth"
 	"api/src/database"
 	"api/src/models"
 	"api/src/repository"
@@ -91,18 +92,31 @@ func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 	resps.JSON(w, http.StatusOK, user)
 }
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	id_var := mux.Vars(r)
+	idStr := id_var["userId"]
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
+		return
+	}
+
+	userIdToken, erro := auth.ExtractUserId(r)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+	if userIdToken != id {
+		resps.ERROR(w, http.StatusForbidden, errors.New("Unauthorized"))
+		return
+	}
+
 	bodyRequest, erro := io.ReadAll(r.Body)
 	if erro != nil {
 		resps.ERROR(w, http.StatusUnprocessableEntity, erro)
 		return
 	}
-	id_var := mux.Vars(r)
-	idStr := id_var["userId"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
-		return
-	}
+
 	var user models.User
 
 	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
@@ -124,18 +138,31 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	resps.JSON(w, http.StatusCreated, user)
 }
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+
+	id_var := mux.Vars(r)
+	idStr := id_var["userId"]
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
+		return
+	}
+
+	userIdToken, erro := auth.ExtractUserId(r)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+	if userIdToken != id {
+		resps.ERROR(w, http.StatusForbidden, errors.New("Unauthorized"))
+		return
+	}
+
 	bodyRequest, erro := io.ReadAll(r.Body)
 	if erro != nil {
 		resps.ERROR(w, http.StatusUnprocessableEntity, erro)
 		return
 	}
-	id_var := mux.Vars(r)
-	idStr := id_var["userId"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
-		return
-	}
+
 	var user models.User
 
 	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
