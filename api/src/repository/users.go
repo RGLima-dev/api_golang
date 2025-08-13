@@ -135,3 +135,64 @@ func (repository Users) DeleteUser(userId uint64) error {
 
 	return nil
 }
+
+func (repository Users) FollowUser(userId uint64, followerId uint64) error {
+	statement, erro := repository.db.Prepare("INSERT IGNORE INTO followers (user_id, follower_id) values (?, ?)")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(userId, followerId); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+func (repository Users) UnfollowUser(userId uint64, followerId uint64) error {
+	statement, erro := repository.db.Prepare("DELETE FROM followers WHERE user_id = ? AND follower_id = ?")
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	result, erro := statement.Exec(userId, followerId)
+	if erro != nil {
+		return erro
+	}
+
+	rowsAffected, erro := result.RowsAffected()
+	if erro != nil {
+		return erro
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("you do not follow this user")
+	}
+
+	return nil
+}
+
+func (repository Users) GetAllFollowersOfUser(followers_of_user uint64) ([]models.User, error) {
+	rows, erro := repository.db.Query("SELECT u.nickname, u.email FROM users u INNER JOIN followers f ON u.id = f.follower_id WHERE f.user_id = ?", followers_of_user)
+	if erro != nil {
+		return nil, erro
+	}
+	defer rows.Close()
+
+	var users []models.User
+
+	for rows.Next() {
+		var user models.User
+		if erro := rows.Scan(&user.Nickname, &user.Email); erro != nil {
+			return nil, erro
+		}
+		users = append(users, user)
+	}
+	if erro := rows.Err(); erro != nil {
+		return nil, erro
+	}
+	return users, nil
+
+}

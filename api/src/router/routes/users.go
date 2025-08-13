@@ -37,4 +37,22 @@ var userRoutes = []Route{
 		Function: controllers.DeleteUser,
 		NeedAuth: false,
 	},
+	{
+		Uri:      "/user/{userId}/follow",
+		Method:   http.MethodPost,
+		Function: controllers.FollowUser,
+		NeedAuth: true,
+	},
+	{
+		Uri:      "/user/{userId}/unfollow",
+		Method:   http.MethodPost,
+		Function: controllers.UnfollowUser,
+		NeedAuth: true,
+	},
+	{
+		Uri:      "/user/{userId}/followers",
+		Method:   http.MethodGet,
+		Function: controllers.GetAllFollowersOfUser,
+		NeedAuth: true,
+	},
 }

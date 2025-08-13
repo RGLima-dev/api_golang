@@ -185,3 +185,95 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		"message": fmt.Sprintf("User with id %d deleted with success!", uint64(id)),
 	})
 }
+func FollowUser(w http.ResponseWriter, r *http.Request) {
+
+	followerId, erro := auth.ExtractUserId(r)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+	params := mux.Vars(r)
+	userId, erro := strconv.ParseUint(params["userId"], 10, 64)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if followerId == userId {
+		resps.ERROR(w, http.StatusForbidden, errors.New("unauthorized"))
+		return
+	}
+	db, erro := database.Connect()
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepo(db)
+	if erro = repo.FollowUser(userId, followerId); erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+
+	followerId, erro := auth.ExtractUserId(r)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+	params := mux.Vars(r)
+	userId, erro := strconv.ParseUint(params["userId"], 10, 64)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if followerId == userId {
+		resps.ERROR(w, http.StatusForbidden, errors.New("unauthorized"))
+		return
+	}
+	db, erro := database.Connect()
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepo(db)
+	if erro = repo.UnfollowUser(userId, followerId); erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func GetAllFollowersOfUser(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	followers_of_user, erro := strconv.ParseUint(params["userId"], 10, 64)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepo(db)
+
+	followers, erro := repo.GetAllFollowersOfUser(followers_of_user)
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	resps.JSONpretty(w, http.StatusOK, followers)
+
+}
