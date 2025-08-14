@@ -31,9 +31,10 @@ func (repository Users) ValidityUserEmail(email string) (models.User, error) {
 	}
 	return user, nil
 }
+
 func (repository Users) Create(user models.User) (uint64, error) {
 	statement, erro := repository.db.Prepare(
-		"INSERT INTO Users(username,nickname,email,passwd) VALUES(?,?,?,?)",
+		"INSERT INTO users(username,nickname,email,passwd) VALUES(?,?,?,?)",
 	)
 	if erro != nil {
 		return 0, nil
@@ -194,5 +195,38 @@ func (repository Users) GetAllFollowersOfUser(followers_of_user uint64) ([]model
 		return nil, erro
 	}
 	return users, nil
+
+}
+
+func (repository Users) FindPassword(userid uint64) (string, error) {
+	row, err := repository.db.Query("SELECT passwd from users WHERE id = ?", userid)
+	if err != nil {
+		return "", err
+	}
+	defer row.Close()
+
+	var user models.User
+
+	if row.Next() {
+		if err = row.Scan(&user.Password); err != nil {
+			return "", err
+		}
+	}
+
+	return user.Password, nil
+}
+
+func (repository Users) UpdatePassword(userid uint64, hashedpwd string) error {
+	statement, erro := repository.db.Prepare("UPDATE users set passwd = ? WHERE id = ?")
+	if erro != nil {
+		return erro
+	}
+
+	defer statement.Close()
+
+	if _, erro = statement.Exec(hashedpwd, userid); erro != nil {
+		return erro
+	}
+	return nil
 
 }

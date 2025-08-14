@@ -6,6 +6,7 @@ import (
 	"api/src/models"
 	"api/src/repository"
 	"api/src/resps"
+	"api/src/security"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -275,5 +276,69 @@ func GetAllFollowersOfUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resps.JSONpretty(w, http.StatusOK, followers)
+
+}
+
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	id_var := mux.Vars(r)
+	idStr := id_var["userId"]
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		resps.ERROR(w, http.StatusBadRequest, errors.New("id inválido"))
+		return
+	}
+
+	userIdToken, erro := auth.ExtractUserId(r)
+	if erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, erro)
+		return
+	}
+	if userIdToken != id {
+		resps.ERROR(w, http.StatusForbidden, errors.New("Unauthorized"))
+		return
+	}
+
+	bodyRequest, erro := io.ReadAll(r.Body)
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	var passwd models.Passwd
+
+	if erro = json.Unmarshal(bodyRequest, &passwd); erro != nil {
+		resps.ERROR(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := database.Connect()
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepo(db)
+	passwd_in_db, erro := repo.FindPassword(userIdToken)
+	if erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	if erro = security.ValidyPasswd(passwd_in_db, passwd.Old_passwd); erro != nil {
+		resps.ERROR(w, http.StatusUnauthorized, errors.New("incorrect passwd"))
+		return
+	}
+
+	hashedpasswd, erro := security.Hash(passwd.New_passwd)
+	if erro != nil {
+		resps.ERROR(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	if erro = repo.UpdatePassword(userIdToken, string(hashedpasswd)); erro != nil {
+		resps.ERROR(w, http.StatusInternalServerError, erro)
+	}
+
+	resps.JSON(w, http.StatusOK, nil)
 
 }
