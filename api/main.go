@@ -6,10 +6,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/rs/cors"
 )
 
 func main() {
 	config.Load()
 	r := router.Generate()
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(r)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), handler))
 }
