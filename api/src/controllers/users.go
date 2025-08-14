@@ -49,6 +49,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	resps.JSON(w, http.StatusCreated, user)
 
 }
+
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	var users []models.User
 
@@ -67,6 +68,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	resps.JSONpretty(w, http.StatusAccepted, users)
 
 }
+
 func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 	id_var := mux.Vars(r)
 	idStr := id_var["userId"]
@@ -92,6 +94,7 @@ func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 
 	resps.JSON(w, http.StatusOK, user)
 }
+
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	id_var := mux.Vars(r)
@@ -138,6 +141,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	resps.JSON(w, http.StatusCreated, user)
 }
+
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	id_var := mux.Vars(r)
@@ -186,6 +190,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		"message": fmt.Sprintf("User with id %d deleted with success!", uint64(id)),
 	})
 }
+
 func FollowUser(w http.ResponseWriter, r *http.Request) {
 
 	followerId, erro := auth.ExtractUserId(r)
