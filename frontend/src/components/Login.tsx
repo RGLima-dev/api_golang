@@ -20,8 +20,9 @@ const Login = () => {
       }
 
       const data = await response.json(); // resposta da API
-      console.log("Login bem-sucedido:", data);
-      alert(`Bem-vindo, ${data.name}`);
+
+      alert(`Bem-vindo`);
+      localStorage.setItem('token',data.login_token)
     } catch (error) {
       console.error(error);
       alert("Falha no login");
